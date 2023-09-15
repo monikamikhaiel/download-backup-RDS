@@ -1,0 +1,392 @@
+{
+	"info": {
+		"_postman_id": "0d7c23de-f96b-4929-9578-ae25b41a1aa3",
+		"name": "get-backups",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Frontend Tokenization",
+			"item": [
+				{
+					"name": "Get Domain Scope Token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"domaintoken\", postman.getResponseHeader(\"X-Subject-Token\"));\r",
+									"//utils.CommonErrorFunction(pm, postman,responseBody, 201, 0, 5000, null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"domain\": {\r\n        \"id\": \"{{domain_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://iam.eu-west-0.{{base_url}}/v3/auth/tokens",
+							"protocol": "https",
+							"host": [
+								"iam",
+								"eu-west-0",
+								"{{base_url}}"
+							],
+							"path": [
+								"v3",
+								"auth",
+								"tokens"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Project Scope Token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// function prototype utils.id_shifter(pm,service_target_id, obj_ids = \"\"obj_ids\"\");\r",
+									"//pm and/or postman is striclty needed as the function will execute pm.* and/or postman.* functions!\r",
+									"//utils.id_shifter(pm,\"project_id\", pm.globals.get(\"region\")+\"_projects\");\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//pm.globals.set(pm.globals.get(\"project_id\")+\"_token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+									"//utils.CommonErrorFunction(pm, postman,responseBody, 201, 0, 5000, null);",
+									"var project_id=pm.variables.get(\"project_id\");",
+									"var region=pm.variables.get(\"region\");",
+									"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+									"pm.globals.set(pm.globals.get(\"project_id\")+\"_token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+									"",
+									"// pm.globals.set(pm.globals.get(\"project_id\")+\"_token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+									"// //<< to be at the end of final project request",
+									"",
+									"// postman.setNextRequest(\"Creating a Load Balancer\");",
+									"// GO TO THE END OF THE TEST SCRIPT."
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{project_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://{{auth_url}}/v3/auth/tokens",
+							"protocol": "https",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"v3",
+								"auth",
+								"tokens"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Querying Details About DB Instances",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// ",
+							"var jsondata= JSON.parse(responseBody);",
+							"var rds_instance_id=jsondata.instances[0].id;",
+							"pm.globals.set(\"rds_instance_id\",rds_instance_id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/v3/{{project_id}}/instances?name={{instance_name}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v3",
+						"{{project_id}}",
+						"instances"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "{{instance_name}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Details About Backups",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// ",
+							"var end_time=new Date().toISOString();",
+							"end_time=end_time.split(\".\")[0]",
+							"pm.globals.set(\"end_time\",end_time+\"+0800\");",
+							"console.log(end_time);",
+							"// ",
+							"var begin_time= new Date(Date.now() - 36784000).toISOString()",
+							"begin_time=begin_time.split(\".\")[0]",
+							"pm.globals.set(\"begin_time\",begin_time+\"+0800\");",
+							"console.log(begin_time);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//the latest backup \r",
+							"\r",
+							"//const sortedActivities = activities.sort((a, b) => b.date - a.date)\r",
+							"\r",
+							"// sort the backups\r",
+							"var jsondata= JSON.parse(responseBody);\r",
+							"var backups=jsondata.backups;\r",
+							"var backup_tosort=[]\r",
+							"// array prototype [id:.... ,end_time:... ]\r",
+							"for (var i=0;i<backups.length;i++){\r",
+							"    backup_tosort.push({\"id\":backups[i].id,\"end_time\":backups[i].end_time});\r",
+							"    console.log(backup_tosort);\r",
+							"   // pm.globals.set(\"backup_id\",backup_id);\r",
+							"}\r",
+							"const sortedBackups = backup_tosort.sort(function(a,b){\r",
+							"  // Turn your strings into dates, and then subtract them\r",
+							"  // to get a value that is either negative, positive, or zero.\r",
+							"  return new Date(b.date) - new Date(a.date);\r",
+							"});\r",
+							"console.log(sortedBackups);\r",
+							"var backup_id=sortedBackups[0].id\r",
+							"pm.globals.set(\"backup_id\",backup_id);\r",
+							"console.log(pm.globals.get(\"backup_id\"));\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/v3/{{project_id}}/backups?instance_id={{rds_instance_id}}&begin_time={{begin_time}}&end_time={{end_time}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v3",
+						"{{project_id}}",
+						"backups"
+					],
+					"query": [
+						{
+							"key": "instance_id",
+							"value": "{{rds_instance_id}}"
+						},
+						{
+							"key": "begin_time",
+							"value": "{{begin_time}}"
+						},
+						{
+							"key": "end_time",
+							"value": "{{end_time}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining the Link for Downloading a Backup File",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsondata= JSON.parse(responseBody);\r",
+							"var download_link=jsondata.files[0].download_link;\r",
+							"pm.globals.set(\"download_link\",download_link);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/v3/{{project_id}}/backup-files?backup_id={{backup_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v3",
+						"{{project_id}}",
+						"backup-files"
+					],
+					"query": [
+						{
+							"key": "backup_id",
+							"value": "{{backup_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download_file",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{download_link}}",
+					"host": [
+						"{{download_link}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
